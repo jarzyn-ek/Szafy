@@ -180,13 +180,14 @@ void lamport_clock_reset(){
 
 void free_my_lift(){
     for (int i = 0; i<size; i++){
-        if(i!=rank){
+        if(i!=rank && waiting_for_ack[i].ts != -111){
             packet_t packet;
             packet.ts = get_increased_lamport_clock();
             //debug("HANDLER-external:: %d in %s sends %s to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_LIFT_ACK], packet.src, packet.ts);
             sendPacket(&packet,i,WANT_LIFT_ACK);
         }
     }
+    //set_my_messages_lamport_clocks(0,0);
 }
 
 void free_my_rooms() {
@@ -203,12 +204,6 @@ void free_my_rooms() {
         }
     }
     my_rooms = 0;
-}
-
-void set_my_messages_lamport_clocks(int index, int value){
-    pthread_mutex_lock(&my_messages_lamport_clocks_mutex);
-        my_messages_lamport_clocks[index]=value;
-    pthread_mutex_unlock(&my_messages_lamport_clocks_mutex);
 }
 
 void set_my_received_ack(int index, int value){

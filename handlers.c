@@ -7,8 +7,7 @@ void want_lift_handler(packet_t *packet){
 
 	// my_request_clock = -1 oznacza ignorowanie requestow
 	//my_request_clock = 0 oznacza ze nie ubiegam sie
-	//jesli size==pyrkon_tickets to ostatni nie dostanie zadnej zgody i itak bedzie czekal wiec uwzgledniam go tu
-	if ((size<=LIFTS) || ((my_request_clock!=-1) && (my_request_clock==0 || my_request_clock > packet->ts || (my_request_clock == packet->ts && rank > packet->src) ))){
+	if ((size<=LIFTS) || ((get_state()!= have_rooms && get_state() != want_lift_upper) || my_request_clock > packet->ts || (my_request_clock == packet->ts && rank > packet->src))) {
 		packet->ts = get_increased_lamport_clock();
 		sendPacket(packet,packet->src,WANT_LIFT_ACK);
 	} else {
@@ -25,7 +24,7 @@ void want_lift_ack_handler(packet_t *packet){
 		int my_ack_count = get_my_received_ack(0);
 		if (my_ack_count >= size - LIFTS){
 			//println("HANDLER:: %d has %d/%d permissions\n",rank, my_ack_count, size)
-			set_my_messages_lamport_clocks(0,-1); //w windzie ignorujemy requesty wejscia do windy
+			//set_my_messages_lamport_clocks(0,-1); //w windzie ignorujemy requesty wejscia do windy
 			pthread_mutex_unlock(&lift_mutex);
 		}
 	}
@@ -79,7 +78,7 @@ int check_rooms(int src,int rooms) {
 		want_rooms = 0;
 		reset_reserved(reserved_rooms_array);
 		reset_rooms_ack();
-		set_my_messages_lamport_clocks(1,-1);
+		// set_my_messages_lamport_clocks(1,-1);
 		pthread_mutex_unlock(&rooms_mutex);
 		//println("HANDLER:: %d process has %d rooms\n", rank, my_rooms);
 	}

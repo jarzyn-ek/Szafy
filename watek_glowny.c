@@ -50,7 +50,7 @@ void init_behavior(){
     //println("[%d] STAN:: %s chce %d pomieszczen \n",rank, state_strings[stan], want_rooms);
     //oczekiwanie na odblokowanie po otrzymaniu odpowiedniej liczby ack
     pthread_mutex_lock(&rooms_mutex);
-
+    sleep(SEC_IN_STATE);
     //println("%d AFTER ROOM_MUTEX\n", rank);
     changeState(have_rooms);
 }
@@ -59,7 +59,7 @@ void have_rooms_behavior() {
     send_message(WANT_LIFT, stan);
 
     pthread_mutex_lock(&lift_mutex);
-
+    sleep(SEC_IN_STATE);
     changeState(in_lift);
 }
 
@@ -68,11 +68,11 @@ void in_lift_behavior(){
 
     println("Having fun in lift!!\n");
     //println("STAN:: %s \n", state_strings[stan]);
-    changeState(finish_state);
 
     free_my_lift();
     sleep(SEC_IN_STATE);
     free_my_rooms();
+    my_received_ack_reset();
     changeState(want_lift_upper);
 }
 
@@ -82,7 +82,7 @@ void want_lift_upper_handler() {
     println("[%d] CHCE WROCIC WINDA", rank);
 
     pthread_mutex_lock(&lift_mutex);
-
+    sleep(SEC_IN_STATE);
     free_my_lift();
     changeState(finish_state);
 }

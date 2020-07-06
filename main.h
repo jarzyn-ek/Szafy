@@ -14,7 +14,6 @@
 //delay w danym stanie
 #define SEC_IN_STATE 2
 
-//ogolne wartosci Pyrkonu
 #define LIFTS 2
 #define ROOMS_NUMBER 4
 
@@ -22,10 +21,6 @@ extern int rank,size;
 extern pthread_t threadKom, threadMon; 
 extern MPI_Datatype MPI_PAKIET_T;
 
-/////////////////////////////////////////////////
-                  /////////////
-
-//liczba pol w structurze packet_t
 #define FIELD_NUM 5
 
 typedef struct packet_t{
@@ -42,11 +37,10 @@ int reserved_rooms_array[4];
 
 int want_rooms;
 
-//stany watku na Pyrkonie
 // PO DOPISANIU NOWEGO stanu KONIECZNA AKTUALIZACJA TABLICY STATE_STRINGS
 // W PLIKU MAIN.C
 extern const char* state_strings[];
-typedef enum {init, have_rooms, in_lift, finish_state} state_t;
+typedef enum {init, in_lift, have_rooms, want_lift_upper, finish_state} state_t;
 extern state_t stan;
 extern int my_rooms;
 
@@ -54,11 +48,10 @@ extern int my_rooms;
 // PO DOPISANIU NOWEGO TYPU KONIECZNA AKTUALIZACJA TABLICY MESSAGE_STRINGS
 // W PLIKU MAIN.C ORAZ W FUNKCJI CONVERT_MESSAGE_TO_INT W MAIN.C
 extern const char* message_strings[];
-//typedef enum {WANT_PYRKON_TICKET, WANT_PYRKON_TICKET_ACK, LEFT_PYRKON} message_t;
-typedef enum {WANT_ROOMS, WANT_ROOMS_ACK, WANT_LIFT, WANT_LIFT_ACK} message_t;
+typedef enum {WANT_ROOMS, WANT_ROOMS_ACK, WANT_LIFT, WANT_LIFT_ACK, FREE_ROOMS} message_t;
 
 typedef void (*f_w)(packet_t *);
-extern f_w handlers[4];
+extern f_w handlers[5];
 
 //handlersy z pliku handlersow 
 // PO DOPISANIU NOWEGO HANDLERA KONIECZNA AKTUALIZACJA TABLICY HANDLERÓW
@@ -67,21 +60,16 @@ extern void want_lift_handler(packet_t *packet);
 extern void want_rooms_handler(packet_t *packet);
 extern void want_lift_ack_handler(packet_t *packet);
 extern void want_rooms_ack_handler(packet_t *packet);
-extern void finish_handler(packet_t *packet);
-extern void exit_rooms_handler(packet_t *packet);
+extern void free_rooms_handler(packet_t* packet);
+extern int check_rooms(int src,int rooms);
+extern int count_reserved_rooms();
 
-
-
-//ogolne wartosci Pyrkonu
 extern volatile char end;
 extern int lamport_clock;
-//extern int pyrkon_escapees_number;
 
 //do przechowywania zegarow z czasem wyslania wlasnych żądań 
-//miejsce zero dla czasu zadania pyrkonu, kazde kolejne dla innego warsztatu
 extern int my_messages_lamport_clocks[ROOMS_NUMBER+1];
 //do przechowywania ilosci uzyskanych ack
-//miejsce zero dla ack wejscia na pyrkon, kazde kolejne dla innego warsztatu
 extern int my_received_ack[ROOMS_NUMBER+1];
 
 //zamki na globalne wartosci
@@ -105,7 +93,7 @@ int get_my_received_ack(int index);
 int get_state();
 
 void free_my_lift();
-// void free_my_rooms();
+void free_my_rooms();
 void my_received_ack_increase(int index);
 
 

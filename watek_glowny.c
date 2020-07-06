@@ -21,8 +21,16 @@ void mainLoop(){
                 init_behavior();
                 break;
             }
+            case have_rooms:{
+                have_rooms_behavior();
+                break;
+            }
             case in_lift:{
                 in_lift_behavior();
+                break;
+            }
+            case want_lift_upper:{
+                want_lift_upper_handler();
                 break;
             }
             case finish_state:{
@@ -36,17 +44,18 @@ void mainLoop(){
 }
 
 void init_behavior(){
-    println("STAN:: %s \n", state_strings[stan]);
-    //sleep(SEC_IN_STATE);
-
-    want_rooms = (rand() % (ROOMS_NUMBER));
+    my_received_ack_reset();
+    want_rooms = (rand() % (ROOMS_NUMBER))+1;
     send_message(WANT_ROOMS, stan);
-
+    //println("[%d] STAN:: %s chce %d pomieszczen \n",rank, state_strings[stan], want_rooms);
     //oczekiwanie na odblokowanie po otrzymaniu odpowiedniej liczby ack
     pthread_mutex_lock(&rooms_mutex);
 
-    println("%d AFTER ROOM_MUTEX\n", rank);
+    //println("%d AFTER ROOM_MUTEX\n", rank);
+    changeState(have_rooms);
+}
 
+void have_rooms_behavior() {
     send_message(WANT_LIFT, stan);
 
     pthread_mutex_lock(&lift_mutex);
@@ -57,23 +66,30 @@ void init_behavior(){
 void in_lift_behavior(){
     sleep(SEC_IN_STATE);
 
-    int num = (rand() % (100 - 0 + 1));
     println("Having fun in lift!!\n");
-    if (num%8==0) {
-        println("STAN:: %s \n", state_strings[stan]);
-        changeState(finish_state);
-    }
+    //println("STAN:: %s \n", state_strings[stan]);
+    changeState(finish_state);
+
+    free_my_lift();
+    sleep(SEC_IN_STATE);
+    free_my_rooms();
+    changeState(want_lift_upper);
+}
+
+void want_lift_upper_handler() {
+    send_message(WANT_LIFT, stan);
+
+    println("[%d] CHCE WROCIC WINDA", rank);
+
+    pthread_mutex_lock(&lift_mutex);
+
+    free_my_lift();
+    changeState(finish_state);
 }
 
 void finish_state_behavior(){
-    println("STAN:: %s \n",state_strings[stan]);
+    println("**** STAN:: %s ****\n",state_strings[stan]);
     sleep(SEC_IN_STATE);
-
-    // pthread_mutex_lock(&lift_mutex);
-
-    free_my_lift();
-    // send_message(OUT_OF_LIFT, stan);
-
     sleep(SEC_IN_STATE);
     changeState(init);
 }

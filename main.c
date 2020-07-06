@@ -21,14 +21,15 @@ pthread_mutex_t my_received_ack_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t waiting_for_ack_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 state_t stan = init;
-const char* message_strings[] = {"WANT_ROOMS","WANT_ROOMS_ACK", "WANT_LIFT", "WANT_LIFT_ACK"};
-const char* state_strings[] = {"init", "have_rooms", "in_lift", "finish_state"};
+const char* message_strings[] = {"WANT_ROOMS","WANT_ROOMS_ACK", "WANT_LIFT", "WANT_LIFT_ACK", "FREE_ROOMS"};
+const char* state_strings[] = {"init", "have_rooms", "in_lift","want_lift_upper", "finish_state"};
 
-f_w handlers[4] = {
+f_w handlers[5] = {
     [WANT_ROOMS] = want_rooms_handler,
     [WANT_ROOMS_ACK] = want_rooms_ack_handler,
     [WANT_LIFT] = want_lift_handler,
     [WANT_LIFT_ACK] =  want_lift_ack_handler,
+    [FREE_ROOMS] = free_rooms_handler,
 };
 
 extern void mainLoop(void);
@@ -56,7 +57,7 @@ void send_message(message_t message, state_t state){
     for(int i=0; i<size; i++){
         if(i!=rank){
             sendPacket(&packet, i, message);
-            debug("SENDING_REQUEST: %d in %s sends %s to %d\n",rank, state_strings[state], message_strings[message], i);
+            //debug("SENDING_REQUEST: %d in %s sends %s to %d\n",rank, state_strings[state], message_strings[message], i);
         }
     }
 }
@@ -81,6 +82,8 @@ int convert_message_to_int(message_t message){
             return 2;
         case WANT_LIFT_ACK:
             return 3;
+        case FREE_ROOMS:
+            return 4;
 
         default: return -1;
     }
@@ -116,6 +119,7 @@ int get_my_messages_lamport_clocks(int index){
 int get_my_received_ack(int index){
     pthread_mutex_lock(&my_received_ack_mutex);
         int count = my_received_ack[index];
+        //println("[%d] ROOMS ACK %d \n", rank, count);
     pthread_mutex_unlock(&my_received_ack_mutex);
     return count;
 }
@@ -138,19 +142,6 @@ void reset_reserved(int* array) {
         array[i] = 0;
     }
 }
-
-
-// void pyrkon_escapees_number_increase(){
-//     pthread_mutex_lock(&pyrkon_escapees_number_mutex);
-//         pyrkon_escapees_number++;
-//     pthread_mutex_unlock(&pyrkon_escapees_number_mutex);
-// }
-
-// void pyrkon_escapees_number_reset(){
-//     pthread_mutex_lock(&pyrkon_escapees_number_mutex);
-//         pyrkon_escapees_number=0;
-//     pthread_mutex_unlock(&pyrkon_escapees_number_mutex);
-// }
 
 void my_messages_lamport_clocks_reset(){
     pthread_mutex_lock(&my_messages_lamport_clocks_mutex);
@@ -189,25 +180,29 @@ void lamport_clock_reset(){
 
 void free_my_lift(){
     for (int i = 0; i<size; i++){
-        if(waiting_for_ack[i].ts!=-111){
-            packet_t packet = waiting_for_ack[i];
+        if(i!=rank){
+            packet_t packet;
             packet.ts = get_increased_lamport_clock();
-            debug("HANDLER-external:: %d in %s sends %s to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_LIFT_ACK], packet.src, packet.ts);
-            sendPacket(&packet,packet.src,WANT_LIFT_ACK);
+            //debug("HANDLER-external:: %d in %s sends %s to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_LIFT_ACK], packet.src, packet.ts);
+            sendPacket(&packet,i,WANT_LIFT_ACK);
         }
     }
 }
 
 void free_my_rooms() {
         for (int i = 0; i<size; i++){
-            if(waiting_for_rooms_ack[i].ts!=-111){
-                packet_t packet = waiting_for_rooms_ack[i];
+            if (i != rank) {
+                packet_t packet, packetFREE;
                 packet.ts = get_increased_lamport_clock();
                 packet.number_of_rooms = my_rooms;
-                debug("HANDLER-external:: %d in %s sends %s number of rooms: %d to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_ROOMS_ACK], packet.number_of_rooms, packet.src, packet.ts);
-                sendPacket(&packet,packet.src,WANT_ROOMS_ACK);
+                packetFREE.number_of_rooms = my_rooms;
+                //debug("HANDLER-external:: %d in %s sends %s number of rooms: %d to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_ROOMS_ACK], packet.number_of_rooms, packet.src, packet.ts);
+                sendPacket(&packet,i,WANT_ROOMS_ACK);
+                packetFREE.ts = get_increased_lamport_clock();
+                sendPacket(&packetFREE,i,FREE_ROOMS);
         }
     }
+    my_rooms = 0;
 }
 
 void set_my_messages_lamport_clocks(int index, int value){

@@ -57,7 +57,6 @@ void send_message(message_t message, state_t state){
     for(int i=0; i<size; i++){
         if(i!=rank){
             sendPacket(&packet, i, message);
-            //debug("SENDING_REQUEST: %d in %s sends %s to %d\n",rank, state_strings[state], message_strings[message], i);
         }
     }
 }
@@ -119,7 +118,6 @@ int get_my_messages_lamport_clocks(int index){
 int get_my_received_ack(int index){
     pthread_mutex_lock(&my_received_ack_mutex);
         int count = my_received_ack[index];
-        //println("[%d] ROOMS ACK %d \n", rank, count);
     pthread_mutex_unlock(&my_received_ack_mutex);
     return count;
 }
@@ -183,25 +181,25 @@ void free_my_lift(){
         if(i!=rank && waiting_for_ack[i].ts != -111){
             packet_t packet;
             packet.ts = get_increased_lamport_clock();
-            //debug("HANDLER-external:: %d in %s sends %s to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_LIFT_ACK], packet.src, packet.ts);
             sendPacket(&packet,i,WANT_LIFT_ACK);
+            waiting_for_ack[i].ts = -111;
         }
     }
-    //set_my_messages_lamport_clocks(0,0);
 }
 
 void free_my_rooms() {
         for (int i = 0; i<size; i++){
-            if (i != rank) {
-                packet_t packet, packetFREE;
+            if (i != rank && waiting_for_rooms_ack[i].ts != -111) {
+                packet_t packet;
                 packet.ts = get_increased_lamport_clock();
                 packet.number_of_rooms = my_rooms;
-                packetFREE.number_of_rooms = my_rooms;
-                //debug("HANDLER-external:: %d in %s sends %s number of rooms: %d to %d with clock %d\n", rank, state_strings[get_state()], message_strings[WANT_ROOMS_ACK], packet.number_of_rooms, packet.src, packet.ts);
                 sendPacket(&packet,i,WANT_ROOMS_ACK);
-                packetFREE.ts = get_increased_lamport_clock();
-                sendPacket(&packetFREE,i,FREE_ROOMS);
+                waiting_for_rooms_ack[i].ts = -111;
         }
+        packet_t packetFREE;
+        packetFREE.number_of_rooms = my_rooms;
+        packetFREE.ts = get_increased_lamport_clock();
+        sendPacket(&packetFREE,i,FREE_ROOMS);
     }
     my_rooms = 0;
 }

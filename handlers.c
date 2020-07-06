@@ -5,8 +5,6 @@
 void want_lift_handler(packet_t *packet){
 	int my_request_clock = get_my_messages_lamport_clocks(0);
 
-	// my_request_clock = -1 oznacza ignorowanie requestow
-	//my_request_clock = 0 oznacza ze nie ubiegam sie
 	if ((size<=LIFTS) || ((get_state()!= have_rooms && get_state() != want_lift_upper) || my_request_clock > packet->ts || (my_request_clock == packet->ts && rank > packet->src))) {
 		packet->ts = get_increased_lamport_clock();
 		sendPacket(packet,packet->src,WANT_LIFT_ACK);
@@ -23,8 +21,6 @@ void want_lift_ack_handler(packet_t *packet){
 		my_received_ack_increase(0);
 		int my_ack_count = get_my_received_ack(0);
 		if (my_ack_count >= size - LIFTS){
-			//println("HANDLER:: %d has %d/%d permissions\n",rank, my_ack_count, size)
-			//set_my_messages_lamport_clocks(0,-1); //w windzie ignorujemy requesty wejscia do windy
 			pthread_mutex_unlock(&lift_mutex);
 		}
 	}
@@ -35,7 +31,7 @@ void want_rooms_ack_handler(packet_t* packet) {
 	if (get_state() == init) {
 
 		my_received_ack_increase(1);
-		println("[%d] ma %d ROOMS_ACK\n", rank, get_my_received_ack(1));
+		println("MAM %d ROOMS_ACK\n", get_my_received_ack(1));
 		check_rooms(packet->src,packet->number_of_rooms);
 	}
 }
@@ -49,11 +45,6 @@ void free_rooms_handler(packet_t* packet) {
 void want_rooms_handler(packet_t* packet) {
 	int my_request_clock = get_my_messages_lamport_clocks(1);
 
-	//oczekuję, ale jestem dalej w kolejce|............
-	//|...............|..............|. nie oczekuję.........|..............
-	//|...............|..............|.........|.............|....oczekuję z tym samym miejscem w kolejce ale mam wyższy rank.|..
-	//|...............|..............|.........|.............|.................................|..............................|.
-	//|...............v..............|.........v.............|.................................v..............................|.
 	if (get_state()!=init || (my_request_clock > packet->ts || my_request_clock <= 0) || (my_request_clock == packet->ts && rank > packet->src)) {
 		packet->number_of_rooms = my_rooms;
 		packet->ts = get_increased_lamport_clock();
@@ -78,7 +69,6 @@ int check_rooms(int src,int rooms) {
 		want_rooms = 0;
 		reset_reserved(reserved_rooms_array);
 		reset_rooms_ack();
-		// set_my_messages_lamport_clocks(1,-1);
 		pthread_mutex_unlock(&rooms_mutex);
 		//println("HANDLER:: %d process has %d rooms\n", rank, my_rooms);
 	}

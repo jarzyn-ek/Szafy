@@ -130,7 +130,6 @@ void reset_reserved(int* array);
 #define P_CLR printf("%c[%d;%dm",27,0,37);
 
 #define println(FORMAT, ...) printf("%c[%d;%dm [%d]: " FORMAT "%c[%d;%dm\n",  27, (1+(rank/7))%2, 31+(6+rank)%7, rank, ##__VA_ARGS__, 27,0,37);
-//#define println(FORMAT, ...) printf("%c[%d;%dm [%d][%d]: " FORMAT "%c[%d;%dm\n", 27, (1 + (rank / 7)) % 2, 31 + (6 + rank) % 7, rank, lamport_clock, ##__VA_ARGS__, 27, 0, 37);
 
 
 #endif

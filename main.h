@@ -40,7 +40,7 @@ int want_rooms;
 // PO DOPISANIU NOWEGO stanu KONIECZNA AKTUALIZACJA TABLICY STATE_STRINGS
 // W PLIKU MAIN.C
 extern const char* state_strings[];
-typedef enum {init, in_lift, have_rooms, want_lift_upper, finish_state} state_t;
+typedef enum {init, have_rooms, in_lift, want_lift_upper, finish_state} state_t;
 extern state_t stan;
 extern int my_rooms;
 
@@ -68,9 +68,9 @@ extern volatile char end;
 extern int lamport_clock;
 
 //do przechowywania zegarow z czasem wyslania wlasnych żądań 
-extern int my_messages_lamport_clocks[ROOMS_NUMBER+1];
+extern int my_messages_lamport_clocks[2];
 //do przechowywania ilosci uzyskanych ack
-extern int my_received_ack[ROOMS_NUMBER+1];
+extern int my_received_ack[2];
 
 //zamki na globalne wartosci
 extern pthread_mutex_t stateMut;

@@ -3,23 +3,26 @@
 -> make run
 2. Działanie:
 Mamy następujące stany:
-init -----> have_rooms -----> in_lift ----> want_lift_upper -----> finish_state-----
- ^                                                                                  | 
- |                                                                                  |
- -----------------------------------------------------------------------------------         ---------
+init -----> have_rooms -----> in_lift ----> want_lift_upper -----> finish_state
+
 A) W stanie INIT proces wysyła wiadomość WANT_ROOMS pozostałym procesom i w przypadku
 otrzymania od nich (wszystkich pozostałych) wiadomości WANT_ROOMS_ACK oraz ilości
 wolnych pokojów odpowiedniej dla procesu, wchodzi do stanu HAVE_ROOMS.
+
 B) W stanie HAVE_ROOMS wysyła wiadomość WANT_LIFT i w przypadku, kiedy otrzyma liczbę
 ACK większą lub równą liczba_procesów-liczba_wind, wchodzi do windy, a tym samym do stanu
 IN_LIFT.
+
 C) W stanie IN_LIFT przebywa chwilę, następnie zwalnia windę, czeka chwilę, zwalnia pokoje,
 resetuje otrzymane wiadomości ACK, przechodzi do stanu WANT_LIFT_UPPER.
+
 D) W stanie WANT_LIFT_UPPER wysyła wiadomość WANT_LIFT, po otrzymaniu odpowiedniej liczby 
 ACK czeka jeszcze chwilę, następnie zwalnia windę i zmienia stan na FINISH_STATE.
+
 E) W FINISH_STATE czeka chwilę, a następnie przechodzi do stanu INIT.
 
 3. Handlery:
+
 --WANT_ROOMS
  - Odpowiadamy WANT_ROOMS_ACK jeżeli nie ubiegamy się o pokoje (też, kiedy je mamy),
 lub ubiegamy się, ale jesteśmy dalej w kolejce. W przeciwnym wypadku WANT_ROOMS_ACK 

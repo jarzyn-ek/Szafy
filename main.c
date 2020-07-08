@@ -22,7 +22,7 @@ pthread_mutex_t waiting_for_ack_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 state_t stan = init;
 const char* message_strings[] = {"WANT_ROOMS","WANT_ROOMS_ACK", "WANT_LIFT", "WANT_LIFT_ACK", "FREE_ROOMS"};
-const char* state_strings[] = {"init", "have_rooms", "in_lift","want_lift_upper", "finish_state"};
+const char* state_strings[] = {"init", "have_rooms", "in_lift","in_rooms","want_lift_upper", "finish_state"};
 
 f_w handlers[5] = {
     [WANT_ROOMS] = want_rooms_handler,

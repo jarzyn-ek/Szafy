@@ -40,7 +40,7 @@ int want_rooms;
 // PO DOPISANIU NOWEGO stanu KONIECZNA AKTUALIZACJA TABLICY STATE_STRINGS
 // W PLIKU MAIN.C
 extern const char* state_strings[];
-typedef enum {init, have_rooms, in_lift, want_lift_upper, finish_state} state_t;
+typedef enum {init, have_rooms, in_lift, in_rooms, want_lift_upper, finish_state} state_t;
 extern state_t stan;
 extern int my_rooms;
 

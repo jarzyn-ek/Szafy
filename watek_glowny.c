@@ -27,6 +27,10 @@ void mainLoop(){
                 in_lift_behavior();
                 break;
             }
+            case in_rooms:{
+                in_rooms_behavior();
+                break;
+            }
             case want_lift_upper:{
                 want_lift_upper_handler();
                 break;
@@ -66,18 +70,27 @@ void in_lift_behavior(){
     sleep(SEC_IN_STATE);
     println("Having fun in lift!!\n");
     free_my_lift();
+    changeState(in_rooms);
+}
+
+void in_rooms_behavior() {
+
     sleep(SEC_IN_STATE);
-    free_my_rooms();
     my_received_ack_reset();
     changeState(want_lift_upper);
-
 }
+
+//todo: zmienic printy
+//in_rooms
 
 void want_lift_upper_handler() {
 
     send_message(WANT_LIFT, stan);
     println("CHCE WROCIC WINDA \n");
     pthread_mutex_lock(&lift_mutex);
+    //
+    free_my_rooms();
+    //
     println("Having fun in lift!!\n");
     sleep(SEC_IN_STATE);
     free_my_lift();

@@ -94,6 +94,7 @@ int get_state();
 
 void free_my_lift();
 void free_my_rooms();
+void send_rooms_ack();
 void my_received_ack_increase(int index);
 
 

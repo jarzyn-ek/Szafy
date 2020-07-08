@@ -2,6 +2,8 @@
 #include "watek_glowny.h"
 
 void initialization() {
+    my_rooms = 0;
+    want_rooms = 0;
     pthread_mutex_lock(&rooms_mutex);
     pthread_mutex_lock(&lift_mutex);
 }
@@ -51,6 +53,7 @@ void init_behavior(){
     want_rooms = (rand() % (ROOMS_NUMBER))+1;
     send_message(WANT_ROOMS, stan);
     pthread_mutex_lock(&rooms_mutex);
+    send_rooms_ack();
     sleep(SEC_IN_STATE);
     changeState(have_rooms);
 

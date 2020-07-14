@@ -21,7 +21,7 @@ extern int rank,size;
 extern pthread_t threadKom, threadMon; 
 extern MPI_Datatype MPI_PAKIET_T;
 
-#define FIELD_NUM 5
+#define FIELD_NUM 6
 
 typedef struct packet_t{
     int ts;       /* timestamp (zegar lamporta */
@@ -29,6 +29,7 @@ typedef struct packet_t{
     int data;     /* przykładowe pole z danymi; można zmienić nazwę na bardziej pasującą */
     int dst;
     int number_of_rooms;
+    int receiver_before_in_queue;
 } packet_t;
 
 struct packet_t* waiting_for_ack;  
@@ -61,7 +62,7 @@ extern void want_rooms_handler(packet_t *packet);
 extern void want_lift_ack_handler(packet_t *packet);
 extern void want_rooms_ack_handler(packet_t *packet);
 extern void free_rooms_handler(packet_t* packet);
-extern int check_rooms(int src,int rooms);
+extern int check_rooms(int src,int rooms, int receiver_before_in_queue);
 extern int count_reserved_rooms();
 
 extern volatile char end;

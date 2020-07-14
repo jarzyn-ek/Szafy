@@ -45,6 +45,7 @@ void inicjuj(int *argc, char ***argv)
     offsets[2] = offsetof(packet_t, data);
     offsets[3] = offsetof(packet_t, dst);
     offsets[4] = offsetof(packet_t, number_of_rooms);
+    offsets[5] = offsetof(packet_t, receiver_before_in_queue);
 
     MPI_Type_create_struct(nitems, blocklengths, offsets, typy, &MPI_PAKIET_T);
     MPI_Type_commit(&MPI_PAKIET_T);

@@ -4,6 +4,7 @@
 void initialization() {
     my_rooms = 0;
     want_rooms = 0;
+    lamport_clock = 0;
     pthread_mutex_lock(&rooms_mutex);
     pthread_mutex_lock(&lift_mutex);
 }
@@ -50,12 +51,11 @@ void mainLoop(){
 void init_behavior(){
 
     println("**** STAN:: %s ****\n",state_strings[stan]);
+    sleep(SEC_IN_STATE);
     my_received_ack_reset();
     want_rooms = (rand() % (ROOMS_NUMBER))+1;
     send_message(WANT_ROOMS, stan);
     pthread_mutex_lock(&rooms_mutex);
-    send_rooms_ack();
-    sleep(SEC_IN_STATE);
     changeState(have_rooms);
 
 }
@@ -93,12 +93,7 @@ void want_lift_upper_handler() {
     send_message(WANT_LIFT, stan);
     println("CHCE WROCIC WINDA \n");
     pthread_mutex_lock(&lift_mutex);
-    //
     free_my_rooms();
-    //
-    println("Having fun in lift!!\n");
-    sleep(SEC_IN_STATE);
-    free_my_lift();
     changeState(finish_state);
 
 }
@@ -106,6 +101,9 @@ void want_lift_upper_handler() {
 void finish_state_behavior(){
 
     println("**** STAN:: %s ****\n",state_strings[stan]);
+    println("Having fun in lift!!\n");
+    sleep(SEC_IN_STATE);
+    free_my_lift();
     sleep(SEC_IN_STATE);
     sleep(SEC_IN_STATE);
     changeState(init);

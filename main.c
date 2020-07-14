@@ -102,7 +102,7 @@ void changeState( state_t newState )
 
 int get_increased_lamport_clock(){
     pthread_mutex_lock(&lamport_mutex);
-        lamport_clock ++;
+        lamport_clock++;
         int clk = lamport_clock;
     pthread_mutex_unlock(&lamport_mutex);
     return clk;
@@ -189,17 +189,12 @@ void free_my_lift(){
 
 void free_my_rooms() {
         for (int i = 0; i<size; i++){
-            if (i != rank && waiting_for_rooms_ack[i].ts != -111) {
-                packet_t packet;
-                packet.ts = get_increased_lamport_clock();
-                packet.number_of_rooms = my_rooms;
-                sendPacket(&packet,i,WANT_ROOMS_ACK);
-                waiting_for_rooms_ack[i].ts = -111;
-        }
-        packet_t packetFREE;
-        packetFREE.number_of_rooms = my_rooms;
-        packetFREE.ts = get_increased_lamport_clock();
-        sendPacket(&packetFREE,i,FREE_ROOMS);
+            if (i != rank) {
+                packet_t packetFREE;
+                packetFREE.number_of_rooms = my_rooms;
+                packetFREE.ts = get_increased_lamport_clock();
+                sendPacket(&packetFREE,i,FREE_ROOMS);
+            }
     }
     my_rooms = 0;
 }
@@ -211,7 +206,7 @@ void send_rooms_ack() {
             packet.ts = get_increased_lamport_clock();
             packet.number_of_rooms = my_rooms;
             sendPacket(&packet,i,WANT_ROOMS_ACK);
-            waiting_for_rooms_ack[i].ts = -111;
+            //waiting_for_rooms_ack[i].ts = -111;
         }
     }
 }

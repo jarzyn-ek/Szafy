@@ -58,8 +58,6 @@ void want_rooms_handler(packet_t* packet) {
 	}
 	packet->ts = get_increased_lamport_clock();
 	sendPacket(packet, packet->src, WANT_ROOMS_ACK);
-
-
 }
 
 int check_rooms(int src,int rooms, int receiver_before_in_queue) {

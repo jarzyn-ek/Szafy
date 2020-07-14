@@ -35,7 +35,7 @@ void mainLoop(){
                 break;
             }
             case want_lift_upper:{
-                want_lift_upper_handler();
+                want_lift_upper_behavior();
                 break;
             }
             case finish_state:{
@@ -87,7 +87,7 @@ void in_rooms_behavior() {
     changeState(want_lift_upper);
 }
 
-void want_lift_upper_handler() {
+void want_lift_upper_behavior() {
 
     println("**** STAN:: %s ****\n",state_strings[stan]);
     send_message(WANT_LIFT, stan);

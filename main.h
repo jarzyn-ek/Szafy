@@ -33,7 +33,7 @@ typedef struct packet_t{
 } packet_t;
 
 struct packet_t* waiting_for_ack;  
-struct packet_t* waiting_for_rooms_ack;
+//struct packet_t* waiting_for_rooms_ack;
 int reserved_rooms_array[4];
 
 int want_rooms;

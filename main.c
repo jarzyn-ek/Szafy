@@ -162,10 +162,10 @@ void reset_rooms_ack() {
 void waiting_for_ack_reset(){
     pthread_mutex_lock(&waiting_for_ack_mutex);
     waiting_for_ack = malloc(size * sizeof(packet_t));
-    waiting_for_rooms_ack = malloc(size * sizeof(packet_t));
+    //waiting_for_rooms_ack = malloc(size * sizeof(packet_t));
     for(int i=0; i<size; i++){
         waiting_for_ack[i].ts = -111;
-        waiting_for_rooms_ack[i].ts = -111;
+        //waiting_for_rooms_ack[i].ts = -111;
     }
     pthread_mutex_unlock(&waiting_for_ack_mutex);
 }
@@ -199,17 +199,17 @@ void free_my_rooms() {
     my_rooms = 0;
 }
 
-void send_rooms_ack() {
-    for (int i = 0; i<size; i++){
-        if (i != rank && waiting_for_rooms_ack[i].ts != -111) {
-            packet_t packet;
-            packet.ts = get_increased_lamport_clock();
-            packet.number_of_rooms = my_rooms;
-            sendPacket(&packet,i,WANT_ROOMS_ACK);
-            //waiting_for_rooms_ack[i].ts = -111;
-        }
-    }
-}
+// void send_rooms_ack() {
+//     for (int i = 0; i<size; i++){
+//         if (i != rank && waiting_for_rooms_ack[i].ts != -111) {
+//             packet_t packet;
+//             packet.ts = get_increased_lamport_clock();
+//             packet.number_of_rooms = my_rooms;
+//             sendPacket(&packet,i,WANT_ROOMS_ACK);
+//             //waiting_for_rooms_ack[i].ts = -111;
+//         }
+//     }
+// }
 
 void set_my_received_ack(int index, int value){
     pthread_mutex_lock(&my_received_ack_mutex);
